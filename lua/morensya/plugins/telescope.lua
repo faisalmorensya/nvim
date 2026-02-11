@@ -33,8 +33,15 @@ return {
             ["<C-k>"] = actions.move_selection_previous, -- move to prev result
             ["<C-j>"] = actions.move_selection_next, -- move to next result
             ["<C-q>"] = actions.send_selected_to_qflist + custom_actions.open_trouble_qflist,
-            --["<C-t>"] = trouble_telescope.smart_open_with_trouble,
             ["<C-t>"] = trouble_telescope.open,
+            ["<C-v>"] = actions.select_vertical, -- Open file in a vertical split
+            ["<C-x>"] = actions.select_horizontal, -- Open file in a horizontal split
+            ["<C-n>"] = actions.select_tab, -- Open file in a new tab
+          },
+          n = {
+            ["<C-v>"] = actions.select_vertical,
+            ["<C-x>"] = actions.select_horizontal,
+            ["<C-n>"] = actions.select_tab,
           },
         },
       },
