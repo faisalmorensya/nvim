@@ -9,10 +9,22 @@ return {
     vim.g.loaded_netrwPlugin = 1
 
     nvimtree.setup({
+      update_focused_file = {
+        enable = true,
+      },
       view = {
         width = 40,
         relativenumber = true,
       },
+      -- custom keymaps for file operations
+      on_attach = function(bufnr)
+        local api = require("nvim-tree.api")
+        local function opts(desc)
+          return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+        end
+        api.config.mappings.default_on_attach(bufnr)
+        vim.keymap.set("n", "<CR>", api.node.open.tab, opts("Tab: Open"))
+      end,
       -- change folder arrow icons
       renderer = {
         indent_markers = {
@@ -27,14 +39,17 @@ return {
           },
         },
       },
-      -- disable window_picker for
-      -- explorer to work well with
-      -- window splits
       actions = {
         open_file = {
           window_picker = {
             enable = true,
           },
+          resize_window = true,
+        },
+      },
+      tab = {
+        sync = {
+          open = true, -- sync nvim-tree across tabs
         },
       },
       filters = {

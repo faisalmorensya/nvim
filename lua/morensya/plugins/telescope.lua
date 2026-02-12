@@ -1,12 +1,20 @@
 return {
   "nvim-telescope/telescope.nvim",
-  branch = "0.1.x",
   dependencies = {
     "nvim-lua/plenary.nvim",
     { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     "nvim-tree/nvim-web-devicons",
     "folke/todo-comments.nvim",
   },
+  -- Fix for Neovim 0.11+: ft_to_lang was removed
+  init = function()
+    -- Add compatibility shim for ft_to_lang
+    if not vim.treesitter.ft_to_lang then
+      vim.treesitter.ft_to_lang = function(ft)
+        return ft
+      end
+    end
+  end,
   config = function()
     local telescope = require("telescope")
     local actions = require("telescope.actions")
