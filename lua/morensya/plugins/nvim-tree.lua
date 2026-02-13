@@ -8,12 +8,22 @@ return {
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
 
+    -- Allow resizing nvim-tree with mouse
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = "NvimTree",
+      callback = function()
+        vim.opt_local.winfixwidth = false
+        vim.opt_local.winfixheight = false
+      end,
+    })
+
     nvimtree.setup({
       update_focused_file = {
         enable = true,
+        update_root = true,
       },
       view = {
-        width = 40,
+        width = "25%",
         relativenumber = true,
       },
       -- custom keymaps for file operations
@@ -24,6 +34,7 @@ return {
         end
         api.config.mappings.default_on_attach(bufnr)
         vim.keymap.set("n", "<CR>", api.node.open.tab, opts("Tab: Open"))
+        vim.keymap.set("n", "m", api.fs.rename, opts("Move/Rename"))
       end,
       -- change folder arrow icons
       renderer = {
@@ -44,7 +55,7 @@ return {
           window_picker = {
             enable = true,
           },
-          resize_window = true,
+          resize_window = false,
         },
       },
       tab = {
@@ -58,6 +69,10 @@ return {
       git = {
         ignore = false,
       },
+      hijack_directories = {
+        enable = true,
+        auto_open = true,
+      },
     })
 
     -- set keymaps
@@ -68,5 +83,13 @@ return {
     keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", { desc = "Collapse file explorer" }) -- collapse file explorer
     keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", { desc = "Refresh file explorer" }) -- refresh file explorer
     keymap.set("n", "<leader>et", "<cmd>NvimTreeFocus<CR>", { desc = "Focus file explorer" }) -- focus file explorer
+
+    -- create new file
+    keymap.set("n", "<leader>en", function()
+      local filename = vim.fn.input("New file name: ", "", "file")
+      if filename ~= "" then
+        vim.cmd("e " .. filename)
+      end
+    end, { desc = "Create new file" })
   end,
 }

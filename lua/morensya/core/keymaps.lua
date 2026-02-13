@@ -21,3 +21,25 @@ keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" 
 keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
 keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
 keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
+
+-- select all and copy
+keymap.set("n", "<leader>a", "ggVG", { desc = "Select all" })
+keymap.set("v", "<leader>y", '"+y', { desc = "Copy to system clipboard" })
+keymap.set("n", "<leader>Y", "ggVG\"+y", { desc = "Select all and copy" })
+
+-- macOS-style keymaps (Option = word, Cmd = line/file boundaries)
+-- Option + Arrow = move by word
+for _, mode in ipairs({ "n", "i", "v" }) do
+  keymap.set(mode, "<A-Left>", mode == "i" and "<C-o>b" or "b", { desc = "Word left" })
+  keymap.set(mode, "<A-Right>", mode == "i" and "<C-o>w" or "w", { desc = "Word right" })
+  keymap.set(mode, "<A-Up>", mode == "i" and "<C-o>{" or "{", { desc = "Paragraph up" })
+  keymap.set(mode, "<A-Down>", mode == "i" and "<C-o>}" or "}", { desc = "Paragraph down" })
+end
+
+-- Cmd + Arrow = start/end of line or file
+for _, mode in ipairs({ "n", "i", "v" }) do
+  keymap.set(mode, "<D-Left>", mode == "i" and "<C-o>0" or "0", { desc = "Line start" })
+  keymap.set(mode, "<D-Right>", mode == "i" and "<C-o>$" or "$", { desc = "Line end" })
+  keymap.set(mode, "<D-Up>", mode == "i" and "<C-o>gg" or "gg", { desc = "File start" })
+  keymap.set(mode, "<D-Down>", mode == "i" and "<C-o>G" or "G", { desc = "File end" })
+end
