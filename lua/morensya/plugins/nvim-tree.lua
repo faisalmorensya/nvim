@@ -32,8 +32,36 @@ return {
         local function opts(desc)
           return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
         end
+
+        -- Helper function to switch to existing tab or open in new tab
+        local function smart_open()
+          local node = api.tree.get_node_under_cursor()
+          if not node then
+            return
+          end
+
+          local path = node.absolute_path
+
+          -- Check if file is already open in any tab
+          for _, tabpage in ipairs(vim.api.nvim_list_tabpages()) do
+            for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tabpage)) do
+              local buf = vim.api.nvim_win_get_buf(win)
+              local buf_name = vim.api.nvim_buf_get_name(buf)
+              if buf_name == path then
+                -- File is open in this tab, switch to it
+                vim.api.nvim_set_current_tabpage(tabpage)
+                vim.api.nvim_set_current_win(win)
+                return
+              end
+            end
+          end
+
+          -- File not open in any tab, open in new tab
+          api.node.open.tab()
+        end
+
         api.config.mappings.default_on_attach(bufnr)
-        vim.keymap.set("n", "<CR>", api.node.open.tab, opts("Tab: Open"))
+        vim.keymap.set("n", "<CR>", smart_open, opts("Smart open: switch if open, else new tab"))
         vim.keymap.set("n", "m", api.fs.rename, opts("Move/Rename"))
       end,
       -- change folder arrow icons

@@ -39,12 +39,18 @@ opt.splitbelow = true -- split horizontal window to the bottom
 -- turn off swapfile
 opt.swapfile = false
 
--- winbar: show full file path at top of window (exclude nvim-tree)
-vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
+-- command line
+opt.cmdheight = 0 -- dynamic command line height (0 = only show when needed)
+opt.laststatus = 3 -- global statusline
+
+-- winbar: show full file path at top of window (exclude nvim-tree and telescope)
+vim.api.nvim_create_autocmd("BufWinEnter", {
   callback = function()
-    if vim.bo.filetype == "NvimTree" then
-      vim.opt_local.winbar = nil
-    else
+    local ft = vim.bo.filetype
+    if ft and (ft == "NvimTree" or ft == "TelescopeResults" or ft == "TelescopePrompt" or ft == "lazy") then
+      return
+    end
+    if vim.api.nvim_win_get_config(0).relative == "" then -- only for normal windows, not floating
       vim.opt_local.winbar = "%=%{expand('%:p')}"
     end
   end,

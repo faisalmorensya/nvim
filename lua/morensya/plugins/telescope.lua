@@ -21,12 +21,38 @@ return {
     local transform_mod = require("telescope.actions.mt").transform_mod
 
     local trouble = require("trouble")
-    -- this is original implementation and giving error now
-    --local trouble_telescope = require("trouble.providers.telescope")
-    -- switching to this as recommended
     local trouble_telescope = require("trouble.sources.telescope")
 
-    -- or create your custom action
+    -- Helper function to switch to existing tab or open in new tab
+    local function smart_open(prompt_bufnr)
+      local action_state = require("telescope.actions.state")
+      local entry = action_state.get_selected_entry()
+      local path = entry and entry.value or entry.filename
+
+      if not path then
+        actions.select_default(prompt_bufnr)
+        return
+      end
+
+      -- Check if file is already open in any tab
+      for _, tabpage in ipairs(vim.api.nvim_list_tabpages()) do
+        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tabpage)) do
+          local buf = vim.api.nvim_win_get_buf(win)
+          local buf_name = vim.api.nvim_buf_get_name(buf)
+          if buf_name == path then
+            -- File is open in this tab, switch to it
+            actions.close(prompt_bufnr)
+            vim.api.nvim_set_current_tabpage(tabpage)
+            vim.api.nvim_set_current_win(win)
+            return
+          end
+        end
+      end
+
+      -- File not open in any tab, use default action (open in current window)
+      actions.select_default(prompt_bufnr)
+    end
+
     local custom_actions = transform_mod({
       open_trouble_qflist = function(prompt_bufnr)
         trouble.toggle("quickfix")
@@ -38,15 +64,17 @@ return {
         path_display = { "smart" },
         mappings = {
           i = {
-            ["<C-k>"] = actions.move_selection_previous, -- move to prev result
-            ["<C-j>"] = actions.move_selection_next, -- move to next result
+            ["<CR>"] = smart_open,
+            ["<C-k>"] = actions.move_selection_previous,
+            ["<C-j>"] = actions.move_selection_next,
             ["<C-q>"] = actions.send_selected_to_qflist + custom_actions.open_trouble_qflist,
             ["<C-t>"] = trouble_telescope.open,
-            ["<C-v>"] = actions.select_vertical, -- Open file in a vertical split
-            ["<C-x>"] = actions.select_horizontal, -- Open file in a horizontal split
-            ["<C-n>"] = actions.select_tab, -- Open file in a new tab
+            ["<C-v>"] = actions.select_vertical,
+            ["<C-x>"] = actions.select_horizontal,
+            ["<C-n>"] = actions.select_tab,
           },
           n = {
+            ["<CR>"] = smart_open,
             ["<C-v>"] = actions.select_vertical,
             ["<C-x>"] = actions.select_horizontal,
             ["<C-n>"] = actions.select_tab,
@@ -58,7 +86,7 @@ return {
     telescope.load_extension("fzf")
 
     -- set keymaps
-    local keymap = vim.keymap -- for conciseness
+    local keymap = vim.keymap
 
     keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
     keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
